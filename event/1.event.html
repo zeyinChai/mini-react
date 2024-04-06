@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="root">
+      <div id="parent">
+        <div id="child">点击</div>
+      </div>
+    </div>
+    <script>
+      var parentBubble = () => {
+        console.log("父react冒泡");
+      };
+      var parentCaptrue = () => {
+        console.log("父react捕获");
+      };
+      var childBubble = () => {
+        console.log("子react冒泡");
+      };
+      var childCaptrue = () => {
+        console.log("子react捕获");
+      };
+      let root = document.getElementById("root");
+      let parent = document.getElementById("parent");
+      let child = document.getElementById("child");
+      parent.onClick = parentBubble;
+      parent.onClickCaptrue = parentCaptrue;
+      child.onClick = childBubble;
+      child.onClickCaptrue = childCaptrue;
+      // 模拟react中的事件委托
+      root.addEventListener(
+        "click",
+        (event) => dispatchEvent(event, true),
+        true
+      );
+      root.addEventListener(
+        "click",
+        (event) => dispatchEvent(event, false),
+        false
+      );
+      function dispatchEvent(event, isCaptrue) {
+        let paths = []; // child parent div#root
+        let currentTarget = event.target;
+        while (currentTarget) {
+          paths.push(currentTarget);
+          currentTarget = currentTarget.parentNode;
+        }
+        if (isCaptrue) { // 如果是捕获 就从最后一个开始
+          for (let i = paths.length - 1; i >= 0; i--) {
+            let handler = paths[i].onClickCaptrue;
+            handler && handler();
+          }
+        } else { // 如果是冒泡 就从第一个开始
+          for (let i = 0; i < paths.length; i++) {
+            let handler = paths[i].onClick;
+            handler && handler();
+          }
+        }
+      }
+      parent.addEventListener(
+        "click",
+        () => {
+          console.log("父原生捕获");
+        },
+        true
+      );
+      parent.addEventListener(
+        "click",
+        () => {
+          console.log("父原生冒泡");
+        },
+        false
+      );
+      child.addEventListener(
+        "click",
+        () => {
+          console.log("子原生捕获");
+        },
+        true
+      );
+      child.addEventListener(
+        "click",
+        () => {
+          console.log("子原生冒泡");
+        },
+        false
+      );
+    </script>
+  </body>
+</html>
